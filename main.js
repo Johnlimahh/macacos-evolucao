@@ -64,12 +64,28 @@ function generatePopulation() {
 // Cria a roleta baseada na fitness dos macacos
 function createRoulette() {
   roulette = population.map(monkey => ({ monkey, weight: fitness(monkey) }));
+  
+  // Se a roleta estiver vazia, avisa e interrompe
+  if (roulette.length === 0 || roulette.every(entry => entry.weight === 0)) {
+    alert("Erro: Nenhum macaco tem fitness válida!");
+    return;
+  }
 }
 
 // Função para girar a roleta e selecionar macacos
 function spinRoulette() {
   if (selectedCount >= populationSize) return;
+  if (roulette.length === 0) {
+    alert("Erro: A roleta está vazia!");
+    return;
+  }
+
   let totalFitness = roulette.reduce((acc, entry) => acc + entry.weight, 0);
+  if (totalFitness === 0) {
+    alert("Erro: Fitness total é 0, impossível selecionar.");
+    return;
+  }
+
   let rand = Math.random() * totalFitness;
   let selectedMonkey = null;
 
