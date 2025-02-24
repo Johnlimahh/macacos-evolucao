@@ -1,22 +1,20 @@
-// main.js
+// Número de macacos na população
 const populationSize = 5;
 let population = [];
 let populationCrossOver = [];
-let selectedCount = 0;
+let populationMutacao = [];
 let roulette = [];
 let currentRotation = 0;
+let selectedCount = 0;
 
-document.getElementById("generateBtn").addEventListener("click", generatePopulation);
-document.getElementById("spinBtn").addEventListener("click", spinRouletaContinuamente);
-document.getElementById("offspringBtn").addEventListener("click", generateOffspring);
-document.getElementById("mutateBtn").addEventListener("click", selectMutant);
-
+// Exibe as seções (Seleção, Crossover e Mutação) após gerar a população
 function showSections() {
   document.getElementById("selecao-section").style.display = "block";
   document.getElementById("cross-over-section").style.display = "block";
   document.getElementById("mutacao-section").style.display = "block";
 }
 
+// Função para criar um macaco aleatório
 function randomMonkey() {
   return {
     forca: Math.floor(Math.random() * 101),
@@ -25,10 +23,12 @@ function randomMonkey() {
   };
 }
 
+// Função de fitness: valoriza Força e Agilidade
 function fitness(monkey) {
   return monkey.forca + monkey.agilidade;
 }
 
+// Cria um card para exibir os atributos do macaco, com imagem
 function monkeyCard(monkey) {
   return `
     <div class="monkey-card">
@@ -42,9 +42,11 @@ function monkeyCard(monkey) {
   `;
 }
 
+// Gera a população inicial
 function generatePopulation() {
   population = [];
   populationCrossOver = [];
+  populationMutacao = [];
   selectedCount = 0;
   document.getElementById("population").innerHTML = "";
   document.getElementById("selected").innerHTML = "";
@@ -60,6 +62,7 @@ function generatePopulation() {
   showSections();
 }
 
+// Cria a roleta com base na fitness de cada macaco
 function createRoulette() {
   const canvas = document.getElementById("roletaCanvas");
   const ctx = canvas.getContext("2d");
@@ -69,6 +72,7 @@ function createRoulette() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Desenha cada fatia com cores vibrantes e bordas escuras
   for (const monkey of population) {
     let weight = fitness(monkey) / totalFitness;
     let sliceAngle = weight * 2 * Math.PI;
@@ -79,25 +83,21 @@ function createRoulette() {
     ctx.arc(150, 150, 150, startAngle, endAngle);
     ctx.fillStyle = `hsl(${Math.floor(Math.random() * 360)}, 80%, 60%)`;
     ctx.fill();
+    ctx.lineWidth = 3;
     ctx.strokeStyle = "#000";
     ctx.stroke();
 
     roulette.push({ monkey, weight, startAngle, endAngle });
     startAngle = endAngle;
   }
+  currentRotation = 0;
+  canvas.style.transform = `rotate(${currentRotation}deg)`;
 }
 
-async function spinRouletaContinuamente() {
-  if (roulette.length === 0) return;
-  document.getElementById("spinBtn").disabled = true;
-  while (selectedCount < populationSize) {
-    await spinRoulette();
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
-  document.getElementById("spinBtn").disabled = false;
-}
-
+// Função para girar a roleta e selecionar macacos
 async function spinRoulette() {
+  if (roulette.length === 0) return;
+
   let rand = Math.random();
   let selectedMonkey = null;
   let stopAngle = 0;
@@ -117,12 +117,7 @@ async function spinRoulette() {
   currentRotation = finalRotation % 360;
 
   const canvas = document.getElementById("roletaCanvas");
-  canvas.style.transition = "transform 2s linear";
-  canvas.style.transform = `rotate(${360 * 10}deg)`;
-
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
-  canvas.style.transition = "transform 3s cubic-bezier(0.25, 1, 0.5, 1)";
+  canvas.style.transition = "transform 3s ease-out";
   canvas.style.transform = `rotate(${finalRotation}deg)`;
 
   await new Promise(resolve => setTimeout(resolve, 3000));
@@ -133,15 +128,63 @@ async function spinRoulette() {
   }
 }
 
+// Adiciona o macaco selecionado à seção de seleção (para crossover)
 function addToNextGeneration(monkey) {
   populationCrossOver.push(monkey);
   document.getElementById("selected").innerHTML += monkeyCard(monkey);
 }
 
+// =========================
+// CROSSOVER
+// =========================
+
+function crossoverOnePoint(parent1, parent2) {
+  let child = { ...parent1 };
+  child.agilidade = parent2.agilidade;
+  return child;
+}
+
 function generateOffspring() {
-  console.log("Gerando nova geração...");
+  if (populationCrossOver.length < 2) {
+    alert("Selecione pelo menos dois macacos antes de fazer o crossover!");
+    return;
+  }
+
+  let parent1 = populationCrossOver[0];
+  let parent2 = populationCrossOver[1];
+
+  let child = crossoverOnePoint(parent1, parent2);
+
+  document.getElementById("new-generation-cross-over").innerHTML += monkeyCard(child);
+  populationMutacao.push(child);
+}
+
+// =========================
+// MUTAÇÃO
+// =========================
+
+function mutate(monkey) {
+  let mutated = { ...monkey };
+  let attribute = ["forca", "agilidade", "inteligencia"][Math.floor(Math.random() * 3)];
+  mutated[attribute] = Math.min(100, Math.max(0, mutated[attribute] + (Math.random() < 0.5 ? -10 : 10)));
+  return mutated;
 }
 
 function selectMutant() {
-  console.log("Gerando mutação...");
+  if (populationMutacao.length === 0) {
+    alert("Nenhum macaco disponível para mutação!");
+    return;
+  }
+
+  let mutant = mutate(populationMutacao[0]);
+  document.getElementById("new-generation-mutacao").innerHTML += monkeyCard(mutant);
 }
+
+// =========================
+// EVENTOS
+// =========================
+
+document.getElementById("generateBtn").addEventListener("click", generatePopulation);
+document.getElementById("spinBtn").addEventListener("click", spinRoulette);
+document.getElementById("offspringBtn").addEventListener("click", generateOffspring);
+document.getElementById("mutateBtn").addEventListener("click", selectMutant);
