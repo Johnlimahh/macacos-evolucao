@@ -7,7 +7,7 @@ let roulette = [];
 let currentRotation = 0;
 let selectedCount = 0;
 
-// Exibe as seções (Seleção, Crossover e Mutação) após gerar a população
+// Exibe as seções após gerar a população
 function showSections() {
   document.getElementById("selecao-section").style.display = "block";
   document.getElementById("cross-over-section").style.display = "block";
@@ -28,7 +28,7 @@ function fitness(monkey) {
   return monkey.forca + monkey.agilidade;
 }
 
-// Cria um card para exibir os atributos do macaco, com imagem
+// Cria um card para exibir os atributos do macaco
 function monkeyCard(monkey) {
   return `
     <div class="monkey-card">
@@ -62,7 +62,7 @@ function generatePopulation() {
   showSections();
 }
 
-// Cria a roleta com base na fitness de cada macaco
+// Cria a roleta baseada na fitness dos macacos
 function createRoulette() {
   const canvas = document.getElementById("roletaCanvas");
   const ctx = canvas.getContext("2d");
@@ -72,7 +72,6 @@ function createRoulette() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Desenha cada fatia com cores vibrantes e bordas escuras
   for (const monkey of population) {
     let weight = fitness(monkey) / totalFitness;
     let sliceAngle = weight * 2 * Math.PI;
@@ -96,7 +95,7 @@ function createRoulette() {
 
 // Função para girar a roleta e selecionar macacos
 async function spinRoulette() {
-  if (roulette.length === 0) return;
+  if (roulette.length === 0 || selectedCount >= populationSize) return;
 
   let rand = Math.random();
   let selectedMonkey = null;
@@ -112,23 +111,27 @@ async function spinRoulette() {
   }
 
   let stopAngleDeg = stopAngle * (180 / Math.PI);
-  let baseRotation = 360 * 5;
+  let baseRotation = 360 * 3; // Menos giros para ser mais rápido
   let finalRotation = baseRotation - stopAngleDeg;
   currentRotation = finalRotation % 360;
 
   const canvas = document.getElementById("roletaCanvas");
-  canvas.style.transition = "transform 3s ease-out";
+  canvas.style.transition = "transform 2s ease-out"; // Reduz tempo para ser mais rápido
   canvas.style.transform = `rotate(${finalRotation}deg)`;
 
-  await new Promise(resolve => setTimeout(resolve, 3000));
+  await new Promise(resolve => setTimeout(resolve, 2000));
 
   if (!populationCrossOver.includes(selectedMonkey)) {
     addToNextGeneration(selectedMonkey);
     selectedCount++;
+
+    if (selectedCount === populationSize) {
+      console.log("Todos os macacos selecionados.");
+    }
   }
 }
 
-// Adiciona o macaco selecionado à seção de seleção (para crossover)
+// Adiciona o macaco selecionado à próxima geração
 function addToNextGeneration(monkey) {
   populationCrossOver.push(monkey);
   document.getElementById("selected").innerHTML += monkeyCard(monkey);
