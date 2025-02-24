@@ -7,14 +7,7 @@ let roulette = [];
 let currentRotation = 0;
 let selectedCount = 0;
 
-// Exibe as seções (Seleção, Crossover e Mutação) após gerar a população
-function showSections() {
-  document.getElementById("selecao-section").style.display = "block";
-  document.getElementById("cross-over-section").style.display = "block";
-  document.getElementById("mutacao-section").style.display = "block";
-}
-
-// Função para criar um macaco aleatório
+// Cria um macaco aleatório
 function randomMonkey() {
   return {
     forca: Math.floor(Math.random() * 101),
@@ -28,7 +21,7 @@ function fitness(monkey) {
   return monkey.forca + monkey.agilidade;
 }
 
-// Cria um card para exibir os atributos do macaco, com imagem
+// Cria um card para exibir os atributos do macaco
 function monkeyCard(monkey) {
   return `
     <div class="monkey-card">
@@ -72,7 +65,7 @@ function createRoulette() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Desenha cada fatia com cores vibrantes e bordas escuras
+  // Desenha cada fatia com cores de alto contraste e bordas escuras
   for (const monkey of population) {
     let weight = fitness(monkey) / totalFitness;
     let sliceAngle = weight * 2 * Math.PI;
@@ -94,10 +87,8 @@ function createRoulette() {
   canvas.style.transform = `rotate(${currentRotation}deg)`;
 }
 
-// Função para girar a roleta e selecionar macacos
+// Função para girar a roleta uma vez e gerar um macaco (se ainda não selecionado)
 async function spinRoulette() {
-  if (roulette.length === 0) return;
-
   let rand = Math.random();
   let selectedMonkey = null;
   let stopAngle = 0;
@@ -111,80 +102,53 @@ async function spinRoulette() {
     rand -= entry.weight;
   }
 
-  let stopAngleDeg = stopAngle * (180 / Math.PI);
-  let baseRotation = 360 * 5;
-  let finalRotation = baseRotation - stopAngleDeg;
-  currentRotation = finalRotation % 360;
+  // Girar a roleta
+  await new Promise(resolve => {
+    let rotationSpeed = 15;
+    let rotationInterval = setInterval(() => {
+      currentRotation += rotationSpeed;
+      canvas.style.transform = `rotate(${currentRotation}deg)`;
+      if (currentRotation >= stopAngle + 720) {
+        clearInterval(rotationInterval);
+        resolve();
+      }
+    }, 10);
+  });
 
-  const canvas = document.getElementById("roletaCanvas");
-  canvas.style.transition = "transform 3s ease-out";
-  canvas.style.transform = `rotate(${finalRotation}deg)`;
+  document.getElementById("selected").innerHTML = monkeyCard(selectedMonkey);
+  selectedCount++;
 
-  await new Promise(resolve => setTimeout(resolve, 3000));
-
-  if (!populationCrossOver.includes(selectedMonkey)) {
-    addToNextGeneration(selectedMonkey);
-    selectedCount++;
+  // Exibe os resultados
+  if (selectedCount >= 5) {
+    document.getElementById("selecao-section").style.display = "none";
+    document.getElementById("cross-over-section").style.display = "block";
+    document.getElementById("mutacao-section").style.display = "block";
   }
 }
 
-// Adiciona o macaco selecionado à seção de seleção (para crossover)
-function addToNextGeneration(monkey) {
-  populationCrossOver.push(monkey);
-  document.getElementById("selected").innerHTML += monkeyCard(monkey);
+// Função para gerar descendentes (Crossover)
+function crossover() {
+  // A lógica do crossover vai aqui. Exemplo:
+  populationCrossOver = population.slice(0, 2);
+  document.getElementById("new-generation-cross-over").innerHTML = populationCrossOver.map(monkeyCard).join('');
 }
 
-// =========================
-// CROSSOVER
-// =========================
-
-function crossoverOnePoint(parent1, parent2) {
-  let child = { ...parent1 };
-  child.agilidade = parent2.agilidade;
-  return child;
+// Função para gerar mutação
+function mutate() {
+  // A lógica da mutação vai aqui. Exemplo:
+  populationMutacao = population.slice(0, 2);
+  document.getElementById("new-generation-mutacao").innerHTML = populationMutacao.map(monkeyCard).join('');
 }
 
-function generateOffspring() {
-  if (populationCrossOver.length < 2) {
-    alert("Selecione pelo menos dois macacos antes de fazer o crossover!");
-    return;
-  }
-
-  let parent1 = populationCrossOver[0];
-  let parent2 = populationCrossOver[1];
-
-  let child = crossoverOnePoint(parent1, parent2);
-
-  document.getElementById("new-generation-cross-over").innerHTML += monkeyCard(child);
-  populationMutacao.push(child);
+// Função para exibir as seções necessárias
+function showSections() {
+  document.getElementById("selecao-section").style.display = "block";
+  document.getElementById("cross-over-section").style.display = "none";
+  document.getElementById("mutacao-section").style.display = "none";
 }
 
-// =========================
-// MUTAÇÃO
-// =========================
-
-function mutate(monkey) {
-  let mutated = { ...monkey };
-  let attribute = ["forca", "agilidade", "inteligencia"][Math.floor(Math.random() * 3)];
-  mutated[attribute] = Math.min(100, Math.max(0, mutated[attribute] + (Math.random() < 0.5 ? -10 : 10)));
-  return mutated;
-}
-
-function selectMutant() {
-  if (populationMutacao.length === 0) {
-    alert("Nenhum macaco disponível para mutação!");
-    return;
-  }
-
-  let mutant = mutate(populationMutacao[0]);
-  document.getElementById("new-generation-mutacao").innerHTML += monkeyCard(mutant);
-}
-
-// =========================
-// EVENTOS
-// =========================
-
+// Event Listeners para os botões
 document.getElementById("generateBtn").addEventListener("click", generatePopulation);
 document.getElementById("spinBtn").addEventListener("click", spinRoulette);
-document.getElementById("offspringBtn").addEventListener("click", generateOffspring);
-document.getElementById("mutateBtn").addEventListener("click", selectMutant);
+document.getElementById("offspringBtn").addEventListener("click", crossover);
+document.getElementById("mutateBtn").addEventListener("click", mutate);
