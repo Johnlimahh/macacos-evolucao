@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evolução dos Macacos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>População Inicial de Macacos</h1>
+  <button id="generateBtn">Gerar População</button>
+  <div id="population"></div>
+
+  <!-- Seção de Seleção Natural com Roleta -->
+  <section id="selecao-section" style="display:none;">
+    <h2>Seleção Natural (Roleta)</h2>
+    <div class="roleta-wrapper">
+      <!-- A seta ficará posicionada acima do canvas, mas sobre ele -->
+      <div class="pointer"></div>
+      <canvas id="roletaCanvas" width="300" height="300"></canvas>
+    </div>
+    <button id="spinBtn">Girar Roleta</button>
+    <div id="selected"></div>
+  </section>
+
+  <!-- Seção de Crossover -->
+  <section id="cross-over-section" style="display:none;">
+    <h2>Crossover</h2>
+    <button id="offspringBtn">Gerar Nova Geração</button>
+    <div id="new-generation-cross-over"></div>
+  </section>
+
+  <!-- Seção de Mutação -->
+  <section id="mutacao-section" style="display:none;">
+    <h2>Mutação</h2>
+    <button id="mutateBtn">Gerar Mutação</button>
+    <div id="new-generation-mutacao"></div>
+    <p class="descricao">
+      Objetivo da Mutação: A sobrevivência da espécie depende da seleção natural, que favorece os indivíduos com maior Força, Agilidade e Inteligência. A mutação introduz variações aleatórias, possibilitando a evolução e adaptação dos macacos para um ambiente desafiador.
+    </p>
+  </section>
+
+  <script src="main.js"></script>
+</body>
+</html>

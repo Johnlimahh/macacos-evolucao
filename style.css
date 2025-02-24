@@ -1,0 +1,88 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+  
+  h1, h2 {
+    color: #222;
+  }
+  
+  button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  #population,
+  #selected,
+  #new-generation-cross-over,
+  #new-generation-mutacao {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .monkey-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #333;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px;
+    width: 140px;
+    background-color: #fff;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  }
+  
+  .monkey-card img {
+    margin-bottom: 5px;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .roleta-wrapper {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 20px auto;
+  }
+  
+  /* O canvas terá borda escura para contraste */
+  canvas {
+    display: block;
+    border: 2px solid #333;
+    border-radius: 50%;
+    background-color: #fff;
+  }
+  
+  /* A seta: ficará posicionada sobre o canvas, na parte superior,
+     mas seu centro horizontalizado; a seta será um triângulo apontando para baixo */
+  .pointer {
+    position: absolute;
+    top: -20px; /* Posiciona acima do canvas */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; 
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 20px solid red; /* Triângulo apontando para baixo */
+    z-index: 10;
+  }
+  
+  /* Estilo para a descrição da mutação */
+  .descricao {
+    font-size: 14px;
+    color: #333;
+    margin-top: 10px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
