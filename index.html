@@ -15,7 +15,6 @@
   <section id="selecao-section" style="display:none;">
     <h2>Seleção Natural (Roleta)</h2>
     <div class="roleta-wrapper">
-      <!-- A seta ficará posicionada acima do canvas, mas sobre ele -->
       <div class="pointer"></div>
       <canvas id="roletaCanvas" width="300" height="300"></canvas>
     </div>
@@ -40,6 +39,113 @@
     </p>
   </section>
 
-  <script src="main.js"></script>
+  <script>
+    const populationSize = 5;
+    let population = [];
+    let populationCrossOver = [];
+    let populationMutacao = [];
+    let roulette = [];
+    let selectedCount = 0;
+
+    function showSections() {
+      document.getElementById("selecao-section").style.display = "block";
+      document.getElementById("cross-over-section").style.display = "block";
+      document.getElementById("mutacao-section").style.display = "block";
+    }
+
+    function randomMonkey() {
+      return {
+        forca: Math.floor(Math.random() * 101),
+        agilidade: Math.floor(Math.random() * 101),
+        inteligencia: Math.floor(Math.random() * 101)
+      };
+    }
+
+    function fitness(monkey) {
+      return monkey.forca + monkey.agilidade;
+    }
+
+    function monkeyCard(monkey) {
+      return `
+        <div class="monkey-card">
+          <img src="img/noun-monkey-7381417.svg" alt="Macaco" />
+          <p><strong>Macaco</strong></p>
+          <p>Força: ${monkey.forca}</p>
+          <p>Agilidade: ${monkey.agilidade}</p>
+          <p>Inteligência: ${monkey.inteligencia}</p>
+          <p><small>Fit: ${fitness(monkey)}</small></p>
+        </div>
+      `;
+    }
+
+    function generatePopulation() {
+      population = [];
+      populationCrossOver = [];
+      populationMutacao = [];
+      selectedCount = 0;
+      document.getElementById("population").innerHTML = "";
+      document.getElementById("selected").innerHTML = "";
+      document.getElementById("new-generation-cross-over").innerHTML = "";
+      document.getElementById("new-generation-mutacao").innerHTML = "";
+
+      for (let i = 0; i < populationSize; i++) {
+        let monkey = randomMonkey();
+        population.push(monkey);
+        document.getElementById("population").innerHTML += monkeyCard(monkey);
+      }
+      createRoulette();
+      showSections();
+    }
+
+    function createRoulette() {
+      const canvas = document.getElementById("roletaCanvas");
+      const ctx = canvas.getContext("2d");
+      let totalFitness = population.reduce((acc, monkey) => acc + fitness(monkey), 0);
+      let startAngle = 0;
+      roulette = [];
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const monkey of population) {
+        let weight = fitness(monkey) / totalFitness;
+        let sliceAngle = weight * 2 * Math.PI;
+        let endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(150, 150);
+        ctx.arc(150, 150, 150, startAngle, endAngle);
+        ctx.fillStyle = `hsl(${Math.floor(Math.random() * 360)}, 80%, 60%)`;
+        ctx.fill();
+        ctx.strokeStyle = "#000";
+        ctx.stroke();
+
+        roulette.push({ monkey, weight, startAngle, endAngle });
+        startAngle = endAngle;
+      }
+    }
+
+    async function spinRoulette() {
+      while (selectedCount < populationSize) {
+        let rand = Math.random();
+        let selectedMonkey = null;
+        for (let entry of roulette) {
+          if (rand < entry.weight) {
+            selectedMonkey = entry.monkey;
+            break;
+          }
+          rand -= entry.weight;
+        }
+        if (selectedMonkey && !populationCrossOver.includes(selectedMonkey)) {
+          populationCrossOver.push(selectedMonkey);
+          document.getElementById("selected").innerHTML += monkeyCard(selectedMonkey);
+          selectedCount++;
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    document.getElementById("generateBtn").addEventListener("click", generatePopulation);
+    document.getElementById("spinBtn").addEventListener("click", spinRoulette);
+  </script>
 </body>
 </html>
