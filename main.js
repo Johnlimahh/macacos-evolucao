@@ -7,7 +7,14 @@ let roulette = [];
 let currentRotation = 0;
 let selectedCount = 0;
 
-// Cria um macaco aleatório
+// Exibe as seções (Seleção, Crossover e Mutação) após gerar a população
+function showSections() {
+  document.getElementById("selecao-section").style.display = "block";
+  document.getElementById("cross-over-section").style.display = "block";
+  document.getElementById("mutacao-section").style.display = "block";
+}
+
+// Função para criar um macaco aleatório
 function randomMonkey() {
   return {
     forca: Math.floor(Math.random() * 101),
@@ -21,7 +28,7 @@ function fitness(monkey) {
   return monkey.forca + monkey.agilidade;
 }
 
-// Cria um card para exibir os atributos do macaco
+// Cria um card para exibir os atributos do macaco, com imagem
 function monkeyCard(monkey) {
   return `
     <div class="monkey-card">
@@ -87,7 +94,19 @@ function createRoulette() {
   canvas.style.transform = `rotate(${currentRotation}deg)`;
 }
 
-// Função para girar a roleta uma vez e gerar um macaco (se ainda não selecionado)
+// Função para girar a roleta uma vez até completar 5 macacos
+async function spinRouletaContinuamente() {
+  if (roulette.length === 0) return;
+  document.getElementById("spinBtn").disabled = true;
+
+  while (selectedCount < populationSize) {
+    await spinRoulette();
+    await new Promise(resolve => setTimeout(resolve, 500));  // Espera meio segundo entre as rotações
+  }
+  document.getElementById("spinBtn").disabled = false;
+}
+
+// Gira a roleta uma vez e seleciona um macaco (se ainda não selecionado)
 async function spinRoulette() {
   let rand = Math.random();
   let selectedMonkey = null;
@@ -102,53 +121,50 @@ async function spinRoulette() {
     rand -= entry.weight;
   }
 
-  // Girar a roleta
-  await new Promise(resolve => {
-    let rotationSpeed = 15;
-    let rotationInterval = setInterval(() => {
-      currentRotation += rotationSpeed;
-      canvas.style.transform = `rotate(${currentRotation}deg)`;
-      if (currentRotation >= stopAngle + 720) {
-        clearInterval(rotationInterval);
-        resolve();
-      }
-    }, 10);
-  });
+  let stopAngleDeg = stopAngle * (180 / Math.PI);
+  let baseRotation = 360 * 5;
+  let finalRotation = baseRotation - stopAngleDeg;
+  currentRotation = finalRotation % 360;
 
-  document.getElementById("selected").innerHTML = monkeyCard(selectedMonkey);
-  selectedCount++;
+  const canvas = document.getElementById("roletaCanvas");
+  canvas.style.transition = "transform 2s linear";
+  canvas.style.transform = `rotate(${360 * 10}deg)`;  // Gira várias vezes para gerar a roleta
 
-  // Exibe os resultados
-  if (selectedCount >= 5) {
-    document.getElementById("selecao-section").style.display = "none";
-    document.getElementById("cross-over-section").style.display = "block";
-    document.getElementById("mutacao-section").style.display = "block";
+  await new Promise(resolve => setTimeout(resolve, 2000));  // Aguarda 2 segundos
+
+  canvas.style.transition = "transform 3s cubic-bezier(0.25, 1, 0.5, 1)";
+  canvas.style.transform = `rotate(${finalRotation}deg)`;  // Parada suave na roleta
+
+  await new Promise(resolve => setTimeout(resolve, 3000));  // Aguarda mais 3 segundos
+
+  // Se o macaco não estiver na seleção, adiciona-o
+  if (!populationCrossOver.includes(selectedMonkey)) {
+    addToNextGeneration(selectedMonkey);
+    selectedCount++;
   }
 }
 
-// Função para gerar descendentes (Crossover)
-function crossover() {
-  // A lógica do crossover vai aqui. Exemplo:
-  populationCrossOver = population.slice(0, 2);
-  document.getElementById("new-generation-cross-over").innerHTML = populationCrossOver.map(monkeyCard).join('');
+// Adiciona o macaco selecionado à seção de seleção (para crossover)
+function addToNextGeneration(monkey) {
+  populationCrossOver.push(monkey);
+  document.getElementById("selected").innerHTML += monkeyCard(monkey);
 }
 
-// Função para gerar mutação
-function mutate() {
-  // A lógica da mutação vai aqui. Exemplo:
-  populationMutacao = population.slice(0, 2);
-  document.getElementById("new-generation-mutacao").innerHTML = populationMutacao.map(monkeyCard).join('');
-}
+// =========================
+// CROSSOVER
+// =========================
+// (O código de crossover permanece o mesmo)
 
-// Função para exibir as seções necessárias
-function showSections() {
-  document.getElementById("selecao-section").style.display = "block";
-  document.getElementById("cross-over-section").style.display = "none";
-  document.getElementById("mutacao-section").style.display = "none";
-}
+// =========================
+// MUTAÇÃO
+// =========================
+// (O código de mutação permanece o mesmo)
 
-// Event Listeners para os botões
+// =========================
+// EVENTOS
+// =========================
+
 document.getElementById("generateBtn").addEventListener("click", generatePopulation);
-document.getElementById("spinBtn").addEventListener("click", spinRoulette);
-document.getElementById("offspringBtn").addEventListener("click", crossover);
-document.getElementById("mutateBtn").addEventListener("click", mutate);
+document.getElementById("spinBtn").addEventListener("click", spinRouletaContinuamente);
+document.getElementById("offspringBtn").addEventListener("click", generateOffspring);
+document.getElementById("mutateBtn").addEventListener("click", selectMutant);
