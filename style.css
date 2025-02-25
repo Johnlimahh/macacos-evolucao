@@ -26,7 +26,7 @@ button {
 }
 
 button:disabled {
-  background-color: #ccc;
+  background-color: #000000;
 }
 
 #population, #new-generation-cross-over, #new-generation-mutacao, #selected {
