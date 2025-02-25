@@ -11,6 +11,7 @@ body {
 h1, h2, h3 {
   color: #333;
   text-align: center;
+  width: 100%;
 }
 
 button {
@@ -106,4 +107,19 @@ canvas {
 
 #spinBtn {
   margin-top: 20px;
+}
+
+/* Adicionando estilos para centralizar os botões */
+#selecao-section, #cross-over-section, #mutacao-section {
+  display: none;
+  width: 100%;
+  text-align: center;
+}
+
+/* Garantir que os contêineres dos botões estejam centralizados */
+#new-generation-cross-over, #new-generation-mutacao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
