@@ -1,17 +1,12 @@
 const populationSize = 5;
 let population = [];
 let populationCrossOver = [];
-let populationMutacao = [];
+let roulette = [];
 let selectedCount = 0;
 let isSpinning = false;
-let rouletteColors = []; // Array para armazenar as cores da roleta
+let currentRotation = 0;
 
-const canvas = document.getElementById("roletaCanvas");
-const ctx = canvas.getContext("2d");
-const centerX = canvas.width / 2;
-const centerY = canvas.height / 2;
-const radius = canvas.width / 2;
-let rotationAngle = 0;
+const colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF"]; // Cores fixas para a roleta
 
 function showSections() {
     document.getElementById("selecao-section").style.display = "block";
@@ -30,7 +25,7 @@ function randomMonkey() {
 }
 
 function fitness(monkey) {
-    return monkey.forca + monkey.agilidade;
+    return monkey.forca + monkey.agilidade + monkey.inteligencia;
 }
 
 function monkeyCard(monkey, title = "") {
@@ -71,84 +66,66 @@ function generatePopulation() {
 }
 
 function createRoulette() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const totalFitness = population.reduce((sum, monkey) => sum + monkey.fit, 0);
-    let startAngle = rotationAngle;
+    const canvas = document.getElementById("roletaCanvas");
+    const ctx = canvas.getContext("2d");
+    const sliceAngle = (2 * Math.PI) / populationSize; // Ângulo igual para cada fatia
+    let startAngle = 0;
 
-    // Se as cores da roleta ainda não foram geradas, gera-as
-    if (rouletteColors.length === 0) {
-        population.forEach(() => {
-            rouletteColors.push(`hsl(${Math.random() * 360}, 80%, 60%)`);
-        });
-    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     population.forEach((monkey, index) => {
-        const sliceAngle = (monkey.fit / totalFitness) * 2 * Math.PI;
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
-        ctx.fillStyle = rouletteColors[index]; // Usa as cores armazenadas
+        ctx.moveTo(150, 150);
+        ctx.arc(150, 150, 150, startAngle, startAngle + sliceAngle);
+        ctx.fillStyle = colors[index % colors.length]; // Usa a cor fixa correspondente
         ctx.fill();
         ctx.strokeStyle = "#000";
         ctx.stroke();
+        roulette.push({ monkey, startAngle, endAngle: startAngle + sliceAngle });
         startAngle += sliceAngle;
     });
 }
 
-function animateRoulette(duration = 1000) { //Gira mais rapido
+async function spinRoulette() {
     if (isSpinning) return;
     isSpinning = true;
-    document.getElementById("spinBtn").disabled = true;
 
-    const startTime = Date.now();
-    const spinSpeed = Math.PI * 8; //Gira mais rapido
+    const canvas = document.getElementById("roletaCanvas");
+    const totalSpins = 5; // Número de voltas antes de parar
+    const spinDuration = 2000; // Duração da rotação em milissegundos
+    const stopAngle = Math.random() * 2 * Math.PI; // Ângulo de parada aleatório
 
-    function spinStep() {
-        const elapsed = Date.now() - startTime;
-        if (elapsed < duration) {
-            rotationAngle += spinSpeed * (duration - elapsed) / duration;
-            createRoulette();
-            requestAnimationFrame(spinStep);
-        } else {
-            finalizeSpin();
-        }
-    }
+    // Gira a roleta continuamente
+    canvas.style.transition = "transform 2s linear";
+    canvas.style.transform = `rotate(${360 * totalSpins}deg)`;
 
-    spinStep();
-}
+    await new Promise(resolve => setTimeout(resolve, spinDuration));
 
-function finalizeSpin() {
-    isSpinning = false;
-    const selectedMonkey = weightedSelection();
+    // Para a roleta no ângulo de parada
+    canvas.style.transition = "transform 3s cubic-bezier(0.25, 1, 0.5, 1)";
+    canvas.style.transform = `rotate(${360 * totalSpins + (stopAngle * (180 / Math.PI))}deg)`;
+
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Seleciona o macaco correspondente ao ângulo de parada
+    const selectedMonkey = roulette.find(
+        entry => stopAngle >= entry.startAngle && stopAngle < entry.endAngle
+    ).monkey;
 
     if (!populationCrossOver.includes(selectedMonkey)) {
         populationCrossOver.push(selectedMonkey);
         selectedCount++;
-        document.getElementById("selected").innerHTML += monkeyCard(selectedMonkey); // Adiciona o macaco selecionado à seção "selected"
+        document.getElementById("selected").innerHTML += monkeyCard(selectedMonkey, "Selecionado");
     }
-
-    // Se necessário, desabilite o botão após a seleção
-    document.getElementById("spinBtn").disabled = true;
 
     if (selectedCount < populationSize) {
-        setTimeout(() => animateRoulette(), 1000); // Espera 1 segundo antes de girar de novo
+        setTimeout(() => spinRoulette(), 1000); // Continua girando até selecionar 5 macacos
     } else {
-        document.getElementById("offspringBtn").disabled = false;
-        document.getElementById("mutateBtn").disabled = false;
+        document.getElementById("offspringBtn").disabled = false; // Habilita o botão de gerar nova geração
+        document.getElementById("mutateBtn").disabled = false; // Habilita o botão de mutação
     }
-}
 
-function weightedSelection() {
-    const totalFitness = population.reduce((sum, monkey) => sum + monkey.fit, 0);
-    let randomValue = Math.random() * totalFitness;
-
-    for (const monkey of population) {
-        randomValue -= monkey.fit;
-        if (randomValue <= 0) {
-            return monkey;
-        }
-    }
-    return population[population.length - 1];
+    isSpinning = false;
 }
 
 function generateOffspring() {
@@ -224,7 +201,8 @@ function generateMutation() {
     }
 }
 
+// Event listeners
 document.getElementById("generateBtn").addEventListener("click", generatePopulation);
-document.getElementById("spinBtn").addEventListener("click", () => animateRoulette());
+document.getElementById("spinBtn").addEventListener("click", spinRoulette);
 document.getElementById("offspringBtn").addEventListener("click", generateOffspring);
 document.getElementById("mutateBtn").addEventListener("click", generateMutation);
