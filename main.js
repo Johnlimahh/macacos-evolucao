@@ -1,12 +1,18 @@
 const populationSize = 5;
 let population = [];
 let populationCrossOver = [];
-let roulette = [];
 let selectedCount = 0;
 let isSpinning = false;
 let currentRotation = 0;
+let rotationAngle = 0;
+let rouletteColors = [];
 
-const colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF"]; // Cores fixas para a roleta
+// Canvas setup
+const canvas = document.getElementById("roletaCanvas");
+const ctx = canvas.getContext("2d");
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const radius = Math.min(centerX, centerY);
 
 function showSections() {
     document.getElementById("selecao-section").style.display = "block";
@@ -22,10 +28,6 @@ function randomMonkey() {
     };
     monkey.fit = monkey.forca + monkey.agilidade + monkey.inteligencia;
     return monkey;
-}
-
-function fitness(monkey) {
-    return monkey.forca + monkey.agilidade + monkey.inteligencia;
 }
 
 function monkeyCard(monkey, title = "") {
@@ -59,73 +61,93 @@ function generatePopulation() {
     createRoulette();
     showSections();
 
-    // Habilita os botões de seleção, crossover e mutação
+    // Habilita o botão de girar roleta
     document.getElementById("spinBtn").disabled = false;
-    document.getElementById("offspringBtn").disabled = false;
-    document.getElementById("mutateBtn").disabled = false;
+    
+    // Desabilita os outros botões até completar a seleção
+    document.getElementById("offspringBtn").disabled = true;
+    document.getElementById("mutateBtn").disabled = true;
 }
 
 function createRoulette() {
-    const canvas = document.getElementById("roletaCanvas");
-    const ctx = canvas.getContext("2d");
-    const sliceAngle = (2 * Math.PI) / populationSize; // Ângulo igual para cada fatia
-    let startAngle = 0;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const totalFitness = population.reduce((sum, monkey) => sum + monkey.fit, 0);
+    let startAngle = rotationAngle;
+
+    // Se as cores da roleta ainda não foram geradas, gera-as
+    if (rouletteColors.length === 0) {
+        population.forEach(() => {
+            rouletteColors.push(`hsl(${Math.random() * 360}, 80%, 60%)`);
+        });
+    }
 
     population.forEach((monkey, index) => {
+        const sliceAngle = (monkey.fit / totalFitness) * 2 * Math.PI;
         ctx.beginPath();
-        ctx.moveTo(150, 150);
-        ctx.arc(150, 150, 150, startAngle, startAngle + sliceAngle);
-        ctx.fillStyle = colors[index % colors.length]; // Usa a cor fixa correspondente
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+        ctx.fillStyle = rouletteColors[index]; // Usa as cores armazenadas
         ctx.fill();
         ctx.strokeStyle = "#000";
         ctx.stroke();
-        roulette.push({ monkey, startAngle, endAngle: startAngle + sliceAngle });
         startAngle += sliceAngle;
     });
 }
 
-async function spinRoulette() {
+function animateRoulette(duration = 1000) {
     if (isSpinning) return;
     isSpinning = true;
+    document.getElementById("spinBtn").disabled = true;
 
-    const canvas = document.getElementById("roletaCanvas");
-    const totalSpins = 5; // Número de voltas antes de parar
-    const spinDuration = 2000; // Duração da rotação em milissegundos
-    const stopAngle = Math.random() * 2 * Math.PI; // Ângulo de parada aleatório
+    const startTime = Date.now();
+    const spinSpeed = Math.PI * 8; // Gira mais rápido
 
-    // Gira a roleta continuamente
-    canvas.style.transition = "transform 2s linear";
-    canvas.style.transform = `rotate(${360 * totalSpins}deg)`;
+    function spinStep() {
+        const elapsed = Date.now() - startTime;
+        if (elapsed < duration) {
+            rotationAngle += spinSpeed * (duration - elapsed) / duration;
+            createRoulette();
+            requestAnimationFrame(spinStep);
+        } else {
+            finalizeSpin();
+        }
+    }
 
-    await new Promise(resolve => setTimeout(resolve, spinDuration));
+    spinStep();
+}
 
-    // Para a roleta no ângulo de parada
-    canvas.style.transition = "transform 3s cubic-bezier(0.25, 1, 0.5, 1)";
-    canvas.style.transform = `rotate(${360 * totalSpins + (stopAngle * (180 / Math.PI))}deg)`;
-
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    // Seleciona o macaco correspondente ao ângulo de parada
-    const selectedMonkey = roulette.find(
-        entry => stopAngle >= entry.startAngle && stopAngle < entry.endAngle
-    ).monkey;
+function finalizeSpin() {
+    isSpinning = false;
+    const selectedMonkey = weightedSelection();
 
     if (!populationCrossOver.includes(selectedMonkey)) {
         populationCrossOver.push(selectedMonkey);
         selectedCount++;
-        document.getElementById("selected").innerHTML += monkeyCard(selectedMonkey, "Selecionado");
+        document.getElementById("selected").innerHTML += monkeyCard(selectedMonkey, "Selecionado " + selectedCount); 
     }
 
     if (selectedCount < populationSize) {
-        setTimeout(() => spinRoulette(), 1000); // Continua girando até selecionar 5 macacos
+        // Continua girando automaticamente após um breve intervalo
+        setTimeout(() => animateRoulette(), 1000);
     } else {
-        document.getElementById("offspringBtn").disabled = false; // Habilita o botão de gerar nova geração
-        document.getElementById("mutateBtn").disabled = false; // Habilita o botão de mutação
+        // Quando completar 5 macacos, habilita os botões de crossover e mutação
+        document.getElementById("spinBtn").disabled = true;
+        document.getElementById("offspringBtn").disabled = false;
+        document.getElementById("mutateBtn").disabled = false;
     }
+}
 
-    isSpinning = false;
+function weightedSelection() {
+    const totalFitness = population.reduce((sum, monkey) => sum + monkey.fit, 0);
+    let randomValue = Math.random() * totalFitness;
+
+    for (const monkey of population) {
+        randomValue -= monkey.fit;
+        if (randomValue <= 0) {
+            return monkey;
+        }
+    }
+    return population[population.length - 1];
 }
 
 function generateOffspring() {
@@ -156,14 +178,6 @@ function generateOffspring() {
     } else {
         console.error("Elemento .offspring-generation não encontrado.");
     }
-}
-
-function mutate(monkey) {
-    let mutated = { ...monkey };
-    let attributes = ["forca", "agilidade", "inteligencia"];
-    let attribute = attributes[Math.floor(Math.random() * attributes.length)];
-    mutated[attribute] = Math.min(100, Math.max(0, mutated[attribute] + (Math.random() < 0.5 ? -10 : 10)));
-    return mutated;
 }
 
 function generateMutation() {
@@ -201,8 +215,7 @@ function generateMutation() {
     }
 }
 
-// Event listeners
 document.getElementById("generateBtn").addEventListener("click", generatePopulation);
-document.getElementById("spinBtn").addEventListener("click", spinRoulette);
+document.getElementById("spinBtn").addEventListener("click", () => animateRoulette());
 document.getElementById("offspringBtn").addEventListener("click", generateOffspring);
 document.getElementById("mutateBtn").addEventListener("click", generateMutation);
