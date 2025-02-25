@@ -1,74 +1,109 @@
 body {
   font-family: Arial, sans-serif;
-  text-align: center;
-  margin: 0;
-  padding: 20px;
-  background-color: #f0f0f0;
-}
-
-h1, h2, h3 {
-  color: #222;
-}
-
-button {
-  margin: 10px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-#population,
-#selected,
-.offspring-generation,
-.mutation-generation {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.monkey-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 2px solid #333;
-  border-radius: 5px;
-  padding: 10px;
-  margin: 5px;
-  width: 140px;
-  background-color: #fff;
-  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
 }
 
-.monkey-card img {
-  margin-bottom: 5px;
-  width: 50px;
-  height: 50px;
+h1, h2, h3 {
+  color: #333;
+  text-align: center;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 10px;
+}
+
+button:disabled {
+  background-color: #ccc;
+}
+
+#population, #new-generation-cross-over, #new-generation-mutacao, #selected {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.monkey {
+  padding: 10px;
+  margin: 5px;
+  background-color: #ffeb3b;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 .roleta-wrapper {
   position: relative;
-  width: 300px;
-  height: 300px;
-  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 30px 0;
 }
 
 canvas {
-  display: block;
-  border: 2px solid #333;
-  border-radius: 50%;
-  background-color: #fff;
+  border: none;
 }
 
 .pointer {
   position: absolute;
-  top: -20px;
+  top: 0%;
   left: 50%;
-  transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
   border-top: 20px solid red;
-  z-index: 10;
+  transform: translate(-50%, -100%);
+}
+
+#selected, .offspring-generation, .mutation-generation {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.offspring, .mutation {
+  padding: 10px;
+  margin: 5px;
+  background-color: #90caf9;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.monkey-card {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 10px;
+  text-align: center;
+  width: 150px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.monkey-card img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+/* Deixar as cores da roleta com tamanhos iguais */
+.roleta-sector {
+  flex: 1;
+}
+
+#spinBtn {
+  margin-top: 20px;
 }
