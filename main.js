@@ -123,7 +123,7 @@ function finalizeSpin() {
     if (!populationCrossOver.includes(selectedMonkey)) {
         populationCrossOver.push(selectedMonkey);
         selectedCount++;
-        document.getElementById("selected").innerHTML += monkeyCard(selectedMonkey, "Selecionado " + selectedCount); 
+        document.getElementById("selected").innerHTML += monkeyCard(selectedMonkey, "Macaco " + selectedCount); 
     }
 
     if (selectedCount < populationSize) {
@@ -150,30 +150,74 @@ function weightedSelection() {
     return population[population.length - 1];
 }
 
+// One Point Crossover
+function onePointCrossover(parent1, parent2) {
+    const crossoverPoint = Math.floor(Math.random() * 3); // 0: força, 1: agilidade, 2: inteligência
+    
+    const child = {
+        forca: crossoverPoint <= 0 ? parent1.forca : parent2.forca,
+        agilidade: crossoverPoint <= 1 ? parent1.agilidade : parent2.agilidade,
+        inteligencia: crossoverPoint <= 2 ? parent1.inteligencia : parent2.inteligencia,
+        fit: 0
+    };
+
+    child.fit = child.forca + child.agilidade + child.inteligencia;
+    return child;
+}
+
+// Arithmetic Crossover
+function arithmeticCrossover(parent1, parent2) {
+    const alpha = Math.random();
+    const child = {
+        forca: alpha * parent1.forca + (1 - alpha) * parent2.forca,
+        agilidade: alpha * parent1.agilidade + (1 - alpha) * parent2.agilidade,
+        inteligencia: alpha * parent1.inteligencia + (1 - alpha) * parent2.inteligencia,
+        fit: 0
+    };
+
+    child.fit = child.forca + child.agilidade + child.inteligencia;
+    return child;
+}
+
+// Uniform Crossover
+function uniformCrossover(parent1, parent2) {
+    const child = {
+        forca: Math.random() < 0.5 ? parent1.forca : parent2.forca,
+        agilidade: Math.random() < 0.5 ? parent1.agilidade : parent2.agilidade,
+        inteligencia: Math.random() < 0.5 ? parent1.inteligencia : parent2.inteligencia,
+        fit: 0
+    };
+
+    child.fit = child.forca + child.agilidade + child.inteligencia;
+    return child;
+}
+
+// Outras partes do código permanecem as mesmas...
+
 function generateOffspring() {
     const newGeneration = [];
 
-    for (let i = 0; i < populationCrossOver.length - 1; i += 2) {
-        const parent1 = populationCrossOver[i];
-        const parent2 = populationCrossOver[i + 1];
+    // Selecionar os dois primeiros pais para gerar os filhos
+    const parent1 = populationCrossOver[0];
+    const parent2 = populationCrossOver[1];
 
-        const child = {
-            forca: (parent1.forca + parent2.forca) / 2,
-            agilidade: (parent1.agilidade + parent2.agilidade) / 2,
-            inteligencia: (parent1.inteligencia + parent2.inteligencia) / 2,
-            fit: ((parent1.forca + parent2.forca) / 2) +
-                ((parent1.agilidade + parent2.agilidade) / 2) +
-                ((parent1.inteligencia + parent2.inteligencia) / 2)
-        };
+    // Gerar filhos usando os três tipos de crossover
+    const childOnePoint1 = onePointCrossover(parent1, parent2);
+    const childOnePoint2 = onePointCrossover(parent2, parent1);
+    const childArithmetic = arithmeticCrossover(parent1, parent2);
+    const childUniform = uniformCrossover(parent1, parent2);
 
-        newGeneration.push(child);
-    }
+    // Adicionar os filhos com os títulos específicos
+    newGeneration.push({...childOnePoint1, title: "One Point 1"});
+    newGeneration.push({...childOnePoint2, title: "One Point 2"});
+    newGeneration.push({...childArithmetic, title: "Arithmetic"});
+    newGeneration.push({...childUniform, title: "Uniform"});
 
     const offspringContainer = document.querySelector("#new-generation-cross-over .offspring-generation");
     if (offspringContainer) {
         offspringContainer.innerHTML = "";
         newGeneration.forEach(offspring => {
-            offspringContainer.innerHTML += monkeyCard(offspring, "Filho");
+            offspringContainer.innerHTML += monkeyCard(offspring, offspring.title);
         });
     } else {
         console.error("Elemento .offspring-generation não encontrado.");
