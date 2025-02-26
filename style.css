@@ -44,7 +44,7 @@ button:disabled {
   border-radius: 5px;
 }
 
-.roleta-wrapper {
+.roleta-container {
   position: relative;
   display: flex;
   flex-direction: column;
