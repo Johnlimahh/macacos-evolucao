@@ -1,43 +1,53 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Evolução dos Macacos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação de Algoritmo Genético</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>População Inicial de Macacos</h1>
-    <button id="generateBtn">Gerar População</button>
-    <div id="population"></div>
 
-    <section id="selecao-section" style="display:none;">
-        <h2>Nova Geração de Seleção</h2>
-        <div class="roleta-wrapper">
+    <h1>Simulação de Algoritmo Genético</h1>
+
+    <div class="section">
+        <button id="generateBtn">Gerar População</button>
+    </div>
+
+    <div class="section" id="selecao-section" style="display:none;">
+        <h2>Seleção</h2>
+        
+        <!-- Monkeys gerados pelo "Gerar População" acima da roleta -->
+        <div id="population"></div>
+        
+        <!-- Roleta com ponteiro -->
+        <div class="roleta-container">
             <div class="pointer"></div>
-            <canvas id="roletaCanvas" width="300" height="300"></canvas>
+            <canvas id="roletaCanvas" width="500" height="500"></canvas>
         </div>
-        <button id="spinBtn" disabled>Girar Roleta</button>
+        
+        <!-- Monkeys gerados após girar a roleta abaixo dela -->
         <div id="selected"></div>
-    </section>
+        <button id="spinBtn" disabled>Girar Roleta</button>
+    </div>
 
-    <section id="cross-over-section" style="display:none;">
+    <div class="section" id="cross-over-section" style="display:none;">
         <h2>Cross-Over</h2>
-        <button id="offspringBtn" disabled>Gerar Nova Geração</button>
         <div id="new-generation-cross-over">
-            <h3>Nova Geração de Cross-Over</h3>
+            <h3>Geração de Cross-Over</h3>
             <div class="offspring-generation"></div>
         </div>
-    </section>
+        <button id="offspringBtn" disabled>Gerar Offspring</button>
+    </div>
 
-    <section id="mutacao-section" style="display:none;">
+    <div class="section" id="mutacao-section" style="display:none;">
         <h2>Mutação</h2>
-        <button id="mutateBtn" disabled>Gerar Mutação</button>
         <div id="new-generation-mutacao">
-            <h3>Nova Geração de Mutação</h3>
+            <h3>Geração de Mutação</h3>
             <div class="mutation-generation"></div>
         </div>
-    </section>
+        <button id="mutateBtn" disabled>Gerar Mutação</button>
+    </div>
 
     <script src="main.js"></script>
 </body>
