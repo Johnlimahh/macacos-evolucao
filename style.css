@@ -123,3 +123,11 @@ canvas {
   align-items: center;
   width: 100%;
 }
+
+/* Estilo para o título da Nova Geração de Cross-Over */
+#new-generation-cross-over .offspring-generation h3 {
+    width: 100%;
+    text-align: center;
+    margin-top: 30px;
+    color: #333;
+}
