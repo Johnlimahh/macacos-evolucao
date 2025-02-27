@@ -192,12 +192,10 @@ function uniformCrossover(parent1, parent2) {
     return child;
 }
 
-// Outras partes do código permanecem as mesmas...
-
 function generateOffspring() {
     const newGeneration = [];
 
-    // Selecionar os dois primeiros pais para gerar os filhos
+    // Selecionar os dois primeiros pais para gerar os filhos iniciais
     const parent1 = populationCrossOver[0];
     const parent2 = populationCrossOver[1];
 
@@ -207,20 +205,58 @@ function generateOffspring() {
     const childArithmetic = arithmeticCrossover(parent1, parent2);
     const childUniform = uniformCrossover(parent1, parent2);
 
-    // Adicionar os filhos com os títulos específicos
+    // Adicionar os filhos iniciais com os títulos específicos
     newGeneration.push({...childOnePoint1, title: "One Point 1"});
     newGeneration.push({...childOnePoint2, title: "One Point 2"});
     newGeneration.push({...childArithmetic, title: "Arithmetic"});
     newGeneration.push({...childUniform, title: "Uniform"});
 
+    // Mostrar os filhos iniciais na interface
     const offspringContainer = document.querySelector("#new-generation-cross-over .offspring-generation");
     if (offspringContainer) {
         offspringContainer.innerHTML = "";
+
+        // Mostrar os filhos iniciais
         newGeneration.forEach(offspring => {
             offspringContainer.innerHTML += monkeyCard(offspring, offspring.title);
         });
+
+        // Adicionar título "Nova Geração de Cross-Over"
+        offspringContainer.innerHTML += "<h3>Nova Geração de Cross-Over</h3>";
     } else {
         console.error("Elemento .offspring-generation não encontrado.");
+    }
+
+    // Gerar 5 novos macacos para a Nova Geração de Cross-Over
+    const newGenerationOffspring = [];
+    for (let i = 0; i < 5; i++) {
+        // Selecionar aleatoriamente dois pais da lista newGeneration
+        const randomIndex1 = Math.floor(Math.random() * newGeneration.length);
+        let randomIndex2 = Math.floor(Math.random() * newGeneration.length);
+
+        // Garantir que os índices dos pais não sejam iguais
+        while (randomIndex2 === randomIndex1) {
+            randomIndex2 = Math.floor(Math.random() * newGeneration.length);
+        }
+
+        const parentA = newGeneration[randomIndex1];
+        const parentB = newGeneration[randomIndex2];
+
+        // Usar um método de crossover aleatório
+        const crossoverMethods = [onePointCrossover, arithmeticCrossover, uniformCrossover];
+        const randomMethod = crossoverMethods[Math.floor(Math.random() * crossoverMethods.length)];
+
+        const offspring = randomMethod(parentA, parentB);
+        offspring.title = `Macaco ${i + 1}`;
+
+        newGenerationOffspring.push(offspring);
+    }
+
+    // Mostrar os 5 novos macacos da nova geração na interface
+    if (offspringContainer) {
+        newGenerationOffspring.forEach(offspring => {
+            offspringContainer.innerHTML += monkeyCard(offspring, offspring.title);
+        });
     }
 }
 
