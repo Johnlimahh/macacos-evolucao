@@ -119,11 +119,26 @@ function animateRoulette(duration = 1000) {
 function finalizeSpin() {
     isSpinning = false;
     const selectedMonkey = weightedSelection();
-
-    if (!populationCrossOver.includes(selectedMonkey)) {
-        populationCrossOver.push(selectedMonkey);
+    
+    // Criar uma cópia profunda do macaco selecionado
+    const selectedMonkeyCopy = {
+        forca: selectedMonkey.forca,
+        agilidade: selectedMonkey.agilidade,
+        inteligencia: selectedMonkey.inteligencia,
+        fit: selectedMonkey.fit
+    };
+    
+    // Verificar se já existe um macaco com exatamente as mesmas características
+    const isDuplicate = populationCrossOver.some(monkey => 
+        monkey.forca === selectedMonkeyCopy.forca && 
+        monkey.agilidade === selectedMonkeyCopy.agilidade && 
+        monkey.inteligencia === selectedMonkeyCopy.inteligencia
+    );
+    
+    if (!isDuplicate) {
+        populationCrossOver.push(selectedMonkeyCopy);
         selectedCount++;
-        document.getElementById("selected").innerHTML += monkeyCard(selectedMonkey, "Macaco " + selectedCount); 
+        document.getElementById("selected").innerHTML += monkeyCard(selectedMonkeyCopy, "Macaco " + selectedCount); 
     }
 
     if (selectedCount < populationSize) {
@@ -136,7 +151,6 @@ function finalizeSpin() {
         document.getElementById("mutateBtn").disabled = false;
     }
 }
-
 function weightedSelection() {
     const totalFitness = population.reduce((sum, monkey) => sum + monkey.fit, 0);
     let randomValue = Math.random() * totalFitness;
