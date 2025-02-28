@@ -118,27 +118,25 @@ function animateRoulette(duration = 1000) {
 
 function finalizeSpin() {
     isSpinning = false;
-    const selectedMonkey = weightedSelection();
     
-    // Criar uma cópia profunda do macaco selecionado
-    const selectedMonkeyCopy = {
-        forca: selectedMonkey.forca,
-        agilidade: selectedMonkey.agilidade,
-        inteligencia: selectedMonkey.inteligencia,
-        fit: selectedMonkey.fit
-    };
+    // Seleciona um modelo base com base na roleta
+    const baseMonkey = weightedSelection();
     
-    // Verificar se já existe um macaco com exatamente as mesmas características
-    const isDuplicate = populationCrossOver.some(monkey => 
-        monkey.forca === selectedMonkeyCopy.forca && 
-        monkey.agilidade === selectedMonkeyCopy.agilidade && 
-        monkey.inteligencia === selectedMonkeyCopy.inteligencia
-    );
+    // Gera um novo macaco com características influenciadas pelo macaco base
+    // mas com variações para garantir que seja um novo macaco
+    const newMonkey = generateNewMonkeyBasedOn(baseMonkey);
+    
+    // Verifica se já existe um macaco com características muito similares
+    const isDuplicate = checkForSimilarMonkey(newMonkey);
     
     if (!isDuplicate) {
-        populationCrossOver.push(selectedMonkeyCopy);
+        populationCrossOver.push(newMonkey);
         selectedCount++;
-        document.getElementById("selected").innerHTML += monkeyCard(selectedMonkeyCopy, "Macaco " + selectedCount); 
+        document.getElementById("selected").innerHTML += monkeyCard(newMonkey, "Macaco " + selectedCount); 
+    } else {
+        // Se encontrou um duplicado, tenta gerar um novo macaco
+        setTimeout(() => animateRoulette(500), 200);
+        return;
     }
 
     if (selectedCount < populationSize) {
@@ -151,6 +149,49 @@ function finalizeSpin() {
         document.getElementById("mutateBtn").disabled = false;
     }
 }
+
+// Função para gerar um novo macaco baseado em um modelo, mas com variações
+function generateNewMonkeyBasedOn(baseMonkey) {
+    // Define o quanto os atributos podem variar (de -20 a +20)
+    const variationRange = 20;
+    
+    // Gera valores com variação baseada no macaco original
+    let forca = baseMonkey.forca + (Math.random() * variationRange * 2) - variationRange;
+    let agilidade = baseMonkey.agilidade + (Math.random() * variationRange * 2) - variationRange;
+    let inteligencia = baseMonkey.inteligencia + (Math.random() * variationRange * 2) - variationRange;
+    
+    // Garante que os valores estejam dentro do intervalo válido (0-100)
+    forca = Math.max(0, Math.min(100, forca));
+    agilidade = Math.max(0, Math.min(100, agilidade));
+    inteligencia = Math.max(0, Math.min(100, inteligencia));
+    
+    // Arredonda para 2 casas decimais para melhor apresentação
+    forca = Math.round(forca * 100) / 100;
+    agilidade = Math.round(agilidade * 100) / 100;
+    inteligencia = Math.round(inteligencia * 100) / 100;
+    
+    return {
+        forca,
+        agilidade,
+        inteligencia,
+        fit: forca + agilidade + inteligencia
+    };
+}
+
+// Verifica se existe algum macaco muito similar na população selecionada
+function checkForSimilarMonkey(monkey) {
+    const similarityThreshold = 5; // Define o limite de similaridade (soma das diferenças)
+    
+    return populationCrossOver.some(existingMonkey => {
+        const forcaDiff = Math.abs(existingMonkey.forca - monkey.forca);
+        const agilidadeDiff = Math.abs(existingMonkey.agilidade - monkey.agilidade);
+        const inteligenciaDiff = Math.abs(existingMonkey.inteligencia - monkey.inteligencia);
+        
+        // Se a soma das diferenças for menor que o limite, consideramos similar
+        return (forcaDiff + agilidadeDiff + inteligenciaDiff) < similarityThreshold;
+    });
+}
+
 function weightedSelection() {
     const totalFitness = population.reduce((sum, monkey) => sum + monkey.fit, 0);
     let randomValue = Math.random() * totalFitness;
