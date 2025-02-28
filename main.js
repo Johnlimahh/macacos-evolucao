@@ -6,6 +6,7 @@ let isSpinning = false;
 let currentRotation = 0;
 let rotationAngle = 0;
 let rouletteColors = [];
+let maxFitnessInPopulation = 0; // Armazenar o valor máximo de fitness na população inicial
 
 // Canvas setup
 const canvas = document.getElementById("roletaCanvas");
@@ -58,6 +59,9 @@ function generatePopulation() {
         document.getElementById("population").innerHTML += monkeyCard(monkey);
     }
 
+    // Calcular o fitness máximo na população inicial
+    maxFitnessInPopulation = Math.max(...population.map(monkey => monkey.fit));
+    
     createRoulette();
     showSections();
 
@@ -122,8 +126,8 @@ function finalizeSpin() {
     // Seleciona um modelo base com base na roleta
     const baseMonkey = weightedSelection();
     
-    // Gera um novo macaco com características influenciadas pelo macaco base
-    // mas com variações para garantir que seja um novo macaco
+    // Gera um novo macaco com características baseadas no macaco selecionado
+    // mas garantindo que seu fitness total não ultrapasse o máximo da população inicial
     const newMonkey = generateNewMonkeyBasedOn(baseMonkey);
     
     // Verifica se já existe um macaco com características muito similares
@@ -150,10 +154,10 @@ function finalizeSpin() {
     }
 }
 
-// Função para gerar um novo macaco baseado em um modelo, mas com variações
+// Função para gerar um novo macaco baseado em um modelo, respeitando o limite máximo de fitness
 function generateNewMonkeyBasedOn(baseMonkey) {
-    // Define o quanto os atributos podem variar (de -20 a +20)
-    const variationRange = 20;
+    // Define o quanto os atributos podem variar (de -15 a +15)
+    const variationRange = 15;
     
     // Gera valores com variação baseada no macaco original
     let forca = baseMonkey.forca + (Math.random() * variationRange * 2) - variationRange;
@@ -165,16 +169,29 @@ function generateNewMonkeyBasedOn(baseMonkey) {
     agilidade = Math.max(0, Math.min(100, agilidade));
     inteligencia = Math.max(0, Math.min(100, inteligencia));
     
+    // Calcula o fitness total
+    let totalFit = forca + agilidade + inteligencia;
+    
+    // Se o fitness ultrapassa o máximo da população, normaliza os valores
+    if (totalFit > maxFitnessInPopulation) {
+        const scaleFactor = maxFitnessInPopulation / totalFit;
+        forca = forca * scaleFactor;
+        agilidade = agilidade * scaleFactor;
+        inteligencia = inteligencia * scaleFactor;
+        totalFit = forca + agilidade + inteligencia;
+    }
+    
     // Arredonda para 2 casas decimais para melhor apresentação
     forca = Math.round(forca * 100) / 100;
     agilidade = Math.round(agilidade * 100) / 100;
     inteligencia = Math.round(inteligencia * 100) / 100;
+    totalFit = Math.round(totalFit * 100) / 100;
     
     return {
         forca,
         agilidade,
         inteligencia,
-        fit: forca + agilidade + inteligencia
+        fit: totalFit
     };
 }
 
@@ -336,6 +353,16 @@ function generateMutation() {
         }
 
         mutatedMonkey.fit = mutatedMonkey.forca + mutatedMonkey.agilidade + mutatedMonkey.inteligencia;
+        
+        // Garantir que o fitness não ultrapasse o máximo da população inicial
+        if (mutatedMonkey.fit > maxFitnessInPopulation) {
+            const scaleFactor = maxFitnessInPopulation / mutatedMonkey.fit;
+            mutatedMonkey.forca *= scaleFactor;
+            mutatedMonkey.agilidade *= scaleFactor;
+            mutatedMonkey.inteligencia *= scaleFactor;
+            mutatedMonkey.fit = mutatedMonkey.forca + mutatedMonkey.agilidade + mutatedMonkey.inteligencia;
+        }
+        
         mutationGeneration.push({ ...mutatedMonkey, title: mutationType });
     });
 
