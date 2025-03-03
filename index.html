@@ -7,46 +7,57 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <h1>Simulação de Algoritmo Genético</h1>
 
-    <h1>Simulação de Algoritmo Genético</h1>
-
-    <div class="section">
-        <button id="generateBtn">Gerar População</button>
-    </div>
-
-    <div class="section" id="selecao-section" style="display:none;">
-        <h2>Seleção</h2>
-        
-        <!-- Monkeys gerados pelo "Gerar População" acima da roleta -->
-        <div id="population"></div>
-        
-        <!-- Roleta com ponteiro -->
-        <div class="roleta-container">
-            <div class="pointer"></div>
-            <canvas id="roletaCanvas" width="500" height="500"></canvas>
+        <div class="initial-section">
+            <button id="generateBtn" class="primary-btn">Gerar População</button>
         </div>
-        
-        <!-- Monkeys gerados após girar a roleta abaixo dela -->
-        <div id="selected"></div>
-        <button id="spinBtn" disabled>Girar Roleta</button>
-    </div>
 
-    <div class="section" id="cross-over-section" style="display:none;">
-        <h2>Cross-Over</h2>
-        <div id="new-generation-cross-over">
-            <h3>Geração de Cross-Over</h3>
-            <div class="offspring-generation"></div>
+        <div class="section" id="selecao-section" style="display:none;">
+            <h2>Seleção</h2>
+            
+            <!-- Monkeys gerados pelo "Gerar População" acima da roleta -->
+            <div id="population" class="monkey-container"></div>
+            
+            <!-- Roleta com ponteiro -->
+            <div class="roleta-container">
+                <div class="pointer"></div>
+                <canvas id="roletaCanvas" width="500" height="500"></canvas>
+            </div>
+            
+            <!-- Monkeys gerados após girar a roleta abaixo dela -->
+            <div id="selected" class="monkey-container"></div>
+            <div class="button-container">
+                <button id="spinBtn" class="action-btn" disabled>Girar Roleta</button>
+            </div>
         </div>
-        <button id="offspringBtn" disabled>Gerar Offspring</button>
-    </div>
 
-    <div class="section" id="mutacao-section" style="display:none;">
-        <h2>Mutação</h2>
-        <div id="new-generation-mutacao">
-            <h3>Geração de Mutação</h3>
-            <div class="mutation-generation"></div>
+        <div class="section" id="cross-over-section" style="display:none;">
+            <h2>Cross-Over</h2>
+            <div id="new-generation-cross-over">
+                <h3>Operações de Cross-Over</h3>
+                <div class="offspring-operations"></div>
+                <h3>Nova Geração de Cross-Over</h3>
+                <div class="offspring-generation"></div>
+            </div>
+            <div class="button-container">
+                <button id="offspringBtn" class="action-btn" disabled>Gerar Offspring</button>
+            </div>
         </div>
-        <button id="mutateBtn" disabled>Gerar Mutação</button>
+
+        <div class="section" id="mutacao-section" style="display:none;">
+            <h2>Mutação</h2>
+            <div id="new-generation-mutacao">
+                <h3>Operações de Mutação</h3>
+                <div class="mutation-operations"></div>
+                <h3>Nova Geração de Mutação</h3>
+                <div class="mutation-generation"></div>
+            </div>
+            <div class="button-container">
+                <button id="mutateBtn" class="action-btn" disabled>Gerar Mutação</button>
+            </div>
+        </div>
     </div>
 
     <script src="main.js"></script>
