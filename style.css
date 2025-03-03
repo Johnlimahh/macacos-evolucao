@@ -1,133 +1,242 @@
-body {
-  font-family: Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+:root {
+  --primary-color: #4caf50;
+  --primary-dark: #388e3c;
+  --secondary-color: #2196f3;
+  --secondary-dark: #1976d2;
+  --accent-color: #ff9800;
+  --background-color: #f5f5f5;
+  --card-background: #ffffff;
+  --text-color: #333333;
+  --border-color: #e0e0e0;
+  --success-color: #8bc34a;
+}
+
+* {
   margin: 0;
   padding: 0;
-  background-color: #f5f5f5;
+  box-sizing: border-box;
 }
 
-h1, h2, h3 {
-  color: #333;
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
   text-align: center;
-  width: 100%;
+  color: var(--primary-dark);
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: black;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 10px;
+h2 {
+  color: var(--secondary-dark);
+  margin: 20px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--secondary-color);
+  font-size: 1.8rem;
 }
 
-button:disabled {
-  background-color: #000000;
+h3 {
+  color: var(--accent-color);
+  margin: 15px 0;
+  font-size: 1.4rem;
 }
 
-#population, #new-generation-cross-over, #new-generation-mutacao, #selected {
+.section {
+  background-color: var(--card-background);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.initial-section {
+  text-align: center;
+  margin: 50px 0;
+}
+
+.monkey-container {
   display: flex;
   flex-wrap: wrap;
+  gap: 20px;
   justify-content: center;
-  width: 100%;
-}
-
-.monkey {
-  padding: 10px;
-  margin: 5px;
-  background-color: #ffeb3b;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.roleta-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 30px 0;
-}
-
-canvas {
-  border: none;
-}
-
-.pointer {
-  position: absolute;
-  top: 0%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 20px solid red;
-  transform: translate(-50%, -100%);
-}
-
-#selected, .offspring-generation, .mutation-generation {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  width: 100%;
-}
-
-.offspring, .mutation {
-  padding: 10px;
-  margin: 5px;
-  background-color: #90caf9;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  margin: 20px 0;
 }
 
 .monkey-card {
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin: 10px;
-  text-align: center;
-  width: 150px;
-  background-color: #fff;
+  background-color: var(--card-background);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  width: 200px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.monkey-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.monkey-card.best-monkey {
+  border: 2px solid var(--success-color);
+  background-color: rgba(139, 195, 74, 0.1);
 }
 
 .monkey-card img {
   width: 80px;
   height: 80px;
-  margin-bottom: 10px;
+  margin: 0 auto 10px;
+  display: block;
 }
 
-/* Deixar as cores da roleta com tamanhos iguais */
-.roleta-sector {
-  flex: 1;
+.monkey-card p {
+  margin: 5px 0;
+  font-size: 14px;
 }
 
-#spinBtn {
-  margin-top: 20px;
+.monkey-card strong {
+  color: var(--secondary-dark);
 }
 
-/* Adicionando estilos para centralizar os botões */
-#selecao-section, #cross-over-section, #mutacao-section {
-  display: none;
-  width: 100%;
+.percentage-display {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.roleta-container {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  margin: 30px auto;
+}
+
+.pointer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 20px;
+  height: 40px;
+  background-color: var(--accent-color);
+  clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.button-container {
   text-align: center;
+  margin: 20px 0;
 }
 
-/* Garantir que os contêineres dos botões estejam centralizados */
-#new-generation-cross-over, #new-generation-mutacao {
+.primary-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  margin: 15px 0;
+}
+
+.primary-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 10px;
+}
+
+.action-btn:hover:not(:disabled) {
+  background-color: var(--secondary-dark);
+  transform: translateY(-2px);
+}
+
+.action-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.mutation-pair {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  width: 100%;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+  flex-wrap: wrap;
 }
 
-/* Estilo para o título da Nova Geração de Cross-Over */
-#new-generation-cross-over .offspring-generation h3 {
-    width: 100%;
-    text-align: center;
-    margin-top: 30px;
-    color: #333;
+.arrow {
+  font-size: 24px;
+  color: var(--accent-color);
+  margin: 0 10px;
+}
+
+.offspring-operations, 
+.offspring-generation, 
+.mutation-operations, 
+.mutation-generation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+/* Animação de aparecer */
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .roleta-container {
+      width: 100%;
+      height: auto;
+  }
+  
+  #roletaCanvas {
+      width: 100%;
+      height: auto;
+  }
+  
+  .monkey-card {
+      width: 100%;
+      max-width: 200px;
+  }
 }
